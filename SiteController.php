@@ -1,0 +1,167 @@
+<?php
+
+namespace app\controllers;
+
+use Yii;
+use yii\filters\AccessControl;
+use yii\web\Controller;
+use yii\web\Response;
+use yii\filters\VerbFilter;
+use app\models\LoginForm;
+use app\models\ContactForm;
+
+use app\models\UsuarioForm;
+
+class SiteController extends Controller
+{
+
+    /**
+     * {@inheritdoc}
+     */
+    public function behaviors()
+    {
+        return [
+            'access' => [
+                'class' => AccessControl::className(),
+                'only' => ['logout'],
+                'rules' => [
+                    [
+                        'actions' => ['logout'],
+                        'allow' => true,
+                        'roles' => ['@'],
+                    ],
+                ],
+            ],
+            'verbs' => [
+                'class' => VerbFilter::className(),
+                'actions' => [
+                    'logout' => ['post'],
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function actions()
+    {
+        return [
+            'error' => [
+                'class' => 'yii\web\ErrorAction',
+            ],
+            'captcha' => [
+                'class' => 'yii\captcha\CaptchaAction',
+                'fixedVerifyCode' => YII_ENV_TEST ? 'testme' : null,
+            ],
+        ];
+    }
+
+    /**
+     * Displays homepage.
+     *
+     * @return string
+     */
+    public function actionIndex()
+    {
+        return $this->render('index');
+    }
+    public function actionNumdet($a=458, $b=1780){
+        if($a > $b)
+            return $this->render('cov',['num1'=>$a]);
+        else
+            return $this->render('cov',['num1'=>$b]);
+    }
+    public function actionMercado($var="6º2º TIPP 2020")
+    {
+    	#$var="6to 1era TIPP 2020";
+    	return $this->render('mercado',['varcurso'=>$var]);
+
+    }
+    public function actionEjer($a=100, $b=1500){
+         if ($a > $b)
+            $mayor=$a;
+         else
+            $mayor=$b;
+        return $this->render('epson',['vmayr'=>$mayor]);
+    }
+
+    /**
+     * Login action.
+     *
+     * @return Response|string
+     */
+    public function actionLogin()
+    {
+        if (!Yii::$app->user->isGuest) {
+            return $this->goHome();
+        }
+
+        $model = new LoginForm();
+        if ($model->load(Yii::$app->request->post()) && $model->login()) {
+            return $this->goBack();
+        }
+
+        $model->password = '';
+        return $this->render('login', [
+            'model' => $model,
+        ]);
+    }
+
+    /**
+     * Logout action.
+     *
+     * @return Response
+     */
+    public function actionLogout()
+    {
+        Yii::$app->user->logout();
+
+        return $this->goHome();
+    }
+
+    /**
+     * Displays contact page.
+     *
+     * @return Response|string
+     */
+    public function actionContact()
+    {
+        $model = new ContactForm();
+        if ($model->load(Yii::$app->request->post()) && $model->contact(Yii::$app->params['adminEmail'])) {
+            Yii::$app->session->setFlash('contactFormSubmitted');
+
+            return $this->refresh();
+        }
+        return $this->render('contact', [
+            'model' => $model,
+        ]);
+    }
+
+    /**
+     * Displays about page.
+     *
+     * @return string
+     */
+    public function actionAbout()
+    {
+        return $this->render('about');
+    }
+
+    public function actionSexto($textoxd = "Por defecto aparece nuestro mensaje muñoz@eet1#com")
+    {
+        $contenido="<?='Hola 6°1° TIPP 2020 ?>, es el equivalente de hacer <?php echo 'Hola 6°1° TIPP 2020' ?>";
+        return $this->render('sexto',['varmens'=>$textoxd,'var2'=>$contenido]);
+    }
+
+    public function actionUsuario()
+    {
+        $model = new UsuarioForm;  
+        if ($model->load(Yii::$app->request->post()) && $model->validate())
+        {
+            return $this->render('usuario-confirmado',['model'=>$model]);
+        }  else{
+            return $this->render('usuario',['model'=> $model]);
+        }
+    }
+}
